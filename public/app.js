@@ -101,11 +101,13 @@ async function fetchAndUpdate() {
       statusEl.textContent = 'Resposta vazia da API (ver console)';
       return;
     }
-    // data may contain vs array directly or nested. Ensure it is an array or defaults to empty array.
-    const vehiclesRaw = data.vs || data;
-    const vehicles = Array.isArray(vehiclesRaw) ? vehiclesRaw : []; // CORREÇÃO: Garante que 'vehicles' é um array.
+    
+    // REVISÃO DA CORREÇÃO: Lógica mais robusta para garantir que vehiclesRaw é o array esperado ou um valor que Array.isArray pode processar.
+    const vehiclesRaw = (typeof data === 'object' && data !== null) ? (data.vs || data) : data;
+    const vehicles = Array.isArray(vehiclesRaw) ? vehiclesRaw : []; // Garante que 'vehicles' é um array.
 
     if (vehicles.length === 0) {
+      // Se não há veículos ou a resposta era apenas metadados (ex: { hr: "..." }), o array estará vazio.
       statusEl.textContent = 'Nenhum veículo ativo no momento para essa entrada';
       // remove existing markers
       Object.keys(markers).forEach(id => { map.removeLayer(markers[id]); delete markers[id]; });
