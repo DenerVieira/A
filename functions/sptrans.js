@@ -1,6 +1,15 @@
 const BASE = 'https://api.olhovivo.sptrans.com.br/v2.1';
 const FALLBACK_TOKEN = 'c4e93e161ac7beeac6efb8cfecfab38750f3c0e8f96d2df493ef81ad55340ef5';
 
+// Headers CORS
+function corsHeaders() {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+}
+
 exports.handler = async (event) => {
   try {
     const params = event.queryStringParameters || {};
@@ -42,7 +51,7 @@ exports.handler = async (event) => {
     }
 
     // 3) build target url
-    const endpoint = endpointRaw.replace(/^\/+/, '');
+    const endpoint = endpointRaw.replace(/^\\/+/, '');
     const qs = new URLSearchParams(params).toString();
     const targetUrl = `${BASE}/${endpoint}${qs ? '?' + qs : ''}`;
 
@@ -52,8 +61,16 @@ exports.handler = async (event) => {
     // Forward request
     const res = await fetch(targetUrl, { headers, redirect: 'manual' });
     const text = await res.text();
-    let body;
-    try { body = JSON.parse(text); } catch(e) { body = text; }
+    let body = null; // Inicializamos como null
+
+    try { 
+        body = JSON.parse(text); 
+    } catch(e) { 
+        // CORREÇÃO: Se não for JSON, logamos o erro e mantemos body=null.
+        // O app.js irá tratar body=null como "Resposta vazia da função".
+        console.warn("SPTrans returned non-JSON text for Posicao endpoint:", text);
+        body = null;
+    }
 
     return {
       statusCode: res.status === 200 ? 200 : res.status,
@@ -68,11 +85,3 @@ exports.handler = async (event) => {
     };
   }
 };
-
-function corsHeaders() {
-  return {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Content-Type': 'application/json'
-  };
-}
