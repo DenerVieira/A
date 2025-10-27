@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BusTime - Olho Vivo (SPTrans) + Leaflet</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html,body,#map { height:100%; margin:0; padding:0 }
+    #controls { position:absolute; z-index:1000; left:8px; top:8px; background:white; padding:8px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+    #lineList{max-height:200px; overflow:auto}
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="controls">
+    <div>
+      <input id="search" placeholder="Buscar linha (número ou nome)" />
+      <button id="btnSearch">Buscar</button>
+    </div>
+    <div id="lineList"></div>
+    <div style="margin-top:6px">
+      <button id="btnTrack" disabled>Rastrear linha</button>
+      <button id="btnStop" disabled>Parar</button>
+    </div>
+    <small style="display:block;margin-top:6px">Atualiza a cada 10s quando rastreando</small>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
