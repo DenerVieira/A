@@ -12,13 +12,14 @@ exports.handler = async (event) => {
         body: JSON.stringify({error: 'missing endpoint query param'})
       };
     }
-
     delete params.endpoint;
     const token = process.env.SPTRANS_TOKEN || FALLBACK_TOKEN;
 
+    // 1) Authenticate
     const authUrl = `${BASE}/Login/Autenticar?token=${encodeURIComponent(token)}`;
     const authRes = await fetch(authUrl, { method: 'POST', redirect: 'manual' });
     const authText = await authRes.text();
+    // authText should be "true" when ok
     if (!/true/i.test(authText)) {
       return {
         statusCode: 401,
@@ -27,12 +28,20 @@ exports.handler = async (event) => {
       };
     }
 
-    const rawSetCookie = authRes.headers.get('set-cookie') || authRes.headers.get('Set-Cookie') || '';
+    // 2) get cookies robustly
     let cookieHeader = '';
-    if (rawSetCookie) {
-      cookieHeader = rawSetCookie.split(',').map(piece => piece.trim()).map(part => part.split(';')[0]).join('; ');
+    try {
+      // prefer getAll if available (Headers.prototype.getAll is not standard, so try to read raw)
+      const sc = authRes.headers.get('set-cookie') || authRes.headers.get('Set-Cookie') || '';
+      if (sc) {
+        // Extract name=value pairs
+        cookieHeader = sc.split(',').map(item => item.trim()).map(part => part.split(';')[0]).join('; ');
+      }
+    } catch (e) {
+      cookieHeader = '';
     }
 
+    // 3) build target url
     const endpoint = endpointRaw.replace(/^\/+/, '');
     const qs = new URLSearchParams(params).toString();
     const targetUrl = `${BASE}/${endpoint}${qs ? '?' + qs : ''}`;
@@ -40,7 +49,8 @@ exports.handler = async (event) => {
     const headers = {};
     if (cookieHeader) headers['Cookie'] = cookieHeader;
 
-    const res = await fetch(targetUrl, { headers });
+    // Forward request
+    const res = await fetch(targetUrl, { headers, redirect: 'manual' });
     const text = await res.text();
     let body;
     try { body = JSON.parse(text); } catch(e) { body = text; }
@@ -54,7 +64,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 500,
       headers: corsHeaders(),
-      body: JSON.stringify({ error: err.message })
+      body: JSON.stringify({ error: err.message, stack: err.stack })
     };
   }
 };
