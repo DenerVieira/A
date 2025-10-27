@@ -1,4 +1,6 @@
-# SPTrans Olho Vivo — Netlify + Leaflet
+# SPTrans Olho Vivo — Netlify + Leaflet (v2)
+
+Atualizei o frontend para exibir corretamente os letreiros de ida e volta (ex.: TERM. VARGINHA → MARSILAC) e para lista todas as entradas retornadas, incluindo sl=1 e sl=2.
 
 Deploy:
 1. Coloque os arquivos no repositório: public/ + functions/ + netlify.toml.
