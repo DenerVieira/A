@@ -102,9 +102,9 @@ async function fetchAndUpdate() {
       return;
     }
     
-    // REVISÃO DA CORREÇÃO: Lógica mais robusta para garantir que vehiclesRaw é o array esperado ou um valor que Array.isArray pode processar.
+    // Lógica robusta para identificar o array de veículos
     const vehiclesRaw = (typeof data === 'object' && data !== null) ? (data.vs || data) : data;
-    const vehicles = Array.isArray(vehiclesRaw) ? vehiclesRaw : []; // Garante que 'vehicles' é um array.
+    const vehicles = Array.isArray(vehiclesRaw) ? vehiclesRaw : []; 
 
     if (vehicles.length === 0) {
       // Se não há veículos ou a resposta era apenas metadados (ex: { hr: "..." }), o array estará vazio.
@@ -114,20 +114,30 @@ async function fetchAndUpdate() {
       return;
     }
     const seen = new Set();
-    vehicles.forEach(v => {
-      const id = String(v.p);
-      seen.add(id);
-      const lat = Number(v.py); const lon = Number(v.px);
-      if (!lat || !lon || isNaN(lat) || isNaN(lon)) return;
-      const icon = (currentSL === 1) ? iconIda : iconVolta;
-      if (markers[id]) {
-        markers[id].setLatLng([lat, lon]);
-      } else {
-        const popup = `Veículo ${id}<br/>Acessível: ${v.a}<br/>Hora (UTC): ${v.ta || ''}`;
-        const m = L.marker([lat, lon], { icon }).addTo(map).bindPopup(popup);
-        markers[id] = m;
-      }
-    });
+    
+    // CORREÇÃO FINAL DEFENSIVA: Garante que o forEach só é chamado em um Array.
+    if (Array.isArray(vehicles)) {
+        vehicles.forEach(v => {
+            const id = String(v.p);
+            seen.add(id);
+            const lat = Number(v.py); const lon = Number(v.px);
+            if (!lat || !lon || isNaN(lat) || isNaN(lon)) return;
+            const icon = (currentSL === 1) ? iconIda : iconVolta;
+            if (markers[id]) {
+                markers[id].setLatLng([lat, lon]);
+            } else {
+                const popup = `Veículo ${id}<br/>Acessível: ${v.a}<br/>Hora (UTC): ${v.ta || ''}`;
+                const m = L.marker([lat, lon], { icon }).addTo(map).bindPopup(popup);
+                markers[id] = m;
+            }
+        });
+    } else {
+        // Log de erro caso o código chegue aqui (indica um erro de lógica muito grave ou dado inesperado)
+        console.error("ERRO CRÍTICO: 'vehicles' não é um array após as verificações.", vehicles);
+        statusEl.textContent = 'Erro interno ao processar dados (ver console)';
+        return;
+    }
+    
     // remove markers not seen now
     Object.keys(markers).forEach(id => { if (!seen.has(id)) { map.removeLayer(markers[id]); delete markers[id]; }});
     // auto-zoom to markers
