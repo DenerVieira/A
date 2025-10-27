@@ -1,9 +1,0 @@
-[build]
-  command = "echo 'Construção concluída (site estático)'"
-  publish = "/"
-  functions = "netlify/functions"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/sptrans-proxy"
-  status = 200
