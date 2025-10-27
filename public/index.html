@@ -7,19 +7,22 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     html,body,#map { height:100%; margin:0; padding:0 }
-    #controls { position:absolute; z-index:1000; left:8px; top:8px; background:white; padding:8px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.2)}
-    #lineList{max-height:200px; overflow:auto}
+    #controls { position:absolute; z-index:1000; left:8px; top:8px; background:white; padding:8px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.2); width:320px }
+    #lineList{max-height:260px; overflow:auto; margin-top:6px }
+    .line-item { padding:6px 8px; cursor:pointer; border-bottom:1px solid #eee }
+    .line-item:hover { background:#f0f8ff }
+    .line-item.selected { background:#dfeffd }
   </style>
 </head>
 <body>
   <div id="map"></div>
   <div id="controls">
-    <div>
-      <input id="search" placeholder="Buscar linha (número ou nome)" />
+    <div style="display:flex; gap:6px;">
+      <input id="search" placeholder="Buscar linha (número ou nome)" style="flex:1" />
       <button id="btnSearch">Buscar</button>
     </div>
     <div id="lineList"></div>
-    <div style="margin-top:6px">
+    <div style="margin-top:6px; display:flex; gap:6px;">
       <button id="btnTrack" disabled>Rastrear linha</button>
       <button id="btnStop" disabled>Parar</button>
     </div>
