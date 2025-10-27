@@ -97,13 +97,13 @@ async function fetchAndUpdate() {
     const json = await res.json();
     const data = json.data;
     if (!data) {
-      console.warn('Resposta vazia da função', json); // Resposta Vazia da Função
+      console.warn('Resposta vazia da função', json);
       statusEl.textContent = 'Resposta vazia da API (ver console)';
       return;
     }
     // data may contain vs array directly or nested. Ensure it is an array or defaults to empty array.
     const vehiclesRaw = data.vs || data;
-    const vehicles = Array.isArray(vehiclesRaw) ? vehiclesRaw : []; // CORREÇÃO: Garante que 'vehicles' seja um array.
+    const vehicles = Array.isArray(vehiclesRaw) ? vehiclesRaw : []; // CORREÇÃO: Garante que 'vehicles' é um array.
 
     if (vehicles.length === 0) {
       statusEl.textContent = 'Nenhum veículo ativo no momento para essa entrada';
@@ -112,7 +112,7 @@ async function fetchAndUpdate() {
       return;
     }
     const seen = new Set();
-    vehicles.forEach(v => { // Este forEach agora está protegido contra o TypeError
+    vehicles.forEach(v => {
       const id = String(v.p);
       seen.add(id);
       const lat = Number(v.py); const lon = Number(v.px);
